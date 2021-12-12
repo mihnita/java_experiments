@@ -10,7 +10,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -27,7 +29,7 @@ public class StyledTextDialog {
 	static final Color systemBackgrounColor = display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
 	static final Color colorRed = display.getSystemColor(SWT.COLOR_RED);
 
-	// System font, but bigger, for better visibility (and to make sure that the size is preserved)	
+	// System font, but bigger, for better visibility (and to make sure that the size is preserved)
 	static Font systemFont = display.getSystemFont();
 	static { // bigger font
 		FontData[] fd = systemFont.getFontData();
@@ -67,7 +69,7 @@ public class StyledTextDialog {
 	}
 
 	private void createContents(final Shell shell) {
-		shell.setLayout(new FillLayout());
+		shell.setLayout(new GridLayout(2, true));
 
 		final StyledText styled = new StyledText(shell, SWT.BORDER);
 		styled.setForeground(systemForegroundColor);
@@ -75,8 +77,23 @@ public class StyledTextDialog {
 		styled.setMargins(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE);
 		styled.setFont(systemFont);
 		styled.setWordWrap(true);
-		
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+		styled.setLayoutData(gridData);
+
 		addSetContentAndStyles(styled);
+
+		// Reuse this for the buttons
+		gridData = new GridData(SWT.FILL, SWT.CENTER, false, false);
+
+		Button btnSelectAll = new Button(shell, SWT.NONE);
+		btnSelectAll.setText("Select all");
+		btnSelectAll.addListener(SWT.Selection, event -> styled.selectAll());
+		btnSelectAll.setLayoutData(gridData);
+
+		Button btnCopy = new Button(shell, SWT.NONE);
+		btnCopy.setText("Copy Text to Clipboard");
+		btnCopy.addListener(SWT.Selection, event -> styled.copy());
+		btnCopy.setLayoutData(gridData);
 	}
 
 	private static StyleRange makeRange(Matcher m) {
