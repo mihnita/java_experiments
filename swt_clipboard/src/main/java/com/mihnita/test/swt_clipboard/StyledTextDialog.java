@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.ByteArrayTransfer;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -69,7 +72,8 @@ public class StyledTextDialog {
 	}
 
 	private void createContents(final Shell shell) {
-		shell.setLayout(new GridLayout(2, true));
+		final int columncount = 3;
+		shell.setLayout(new GridLayout(columncount, true));
 
 		final StyledText styled = new StyledText(shell, SWT.BORDER);
 		styled.setForeground(systemForegroundColor);
@@ -77,23 +81,29 @@ public class StyledTextDialog {
 		styled.setMargins(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE);
 		styled.setFont(systemFont);
 		styled.setWordWrap(true);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, columncount, 1);
 		styled.setLayoutData(gridData);
 
 		addSetContentAndStyles(styled);
 
 		// Reuse this for the buttons
 		gridData = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		Button button;
 
-		Button btnSelectAll = new Button(shell, SWT.NONE);
-		btnSelectAll.setText("Select all");
-		btnSelectAll.addListener(SWT.Selection, event -> styled.selectAll());
-		btnSelectAll.setLayoutData(gridData);
+		button = new Button(shell, SWT.NONE);
+		button.setText("Select &All");
+		button.addListener(SWT.Selection, event -> styled.selectAll());
+		button.setLayoutData(gridData);
 
-		Button btnCopy = new Button(shell, SWT.NONE);
-		btnCopy.setText("Copy Text to Clipboard");
-		btnCopy.addListener(SWT.Selection, event -> styled.copy());
-		btnCopy.setLayoutData(gridData);
+		button = new Button(shell, SWT.NONE);
+		button.setText("&Copy to Clipboard");
+		button.addListener(SWT.Selection, event -> styled.copy());
+		button.setLayoutData(gridData);
+
+		button = new Button(shell, SWT.NONE);
+		button.setText("&Dump Clipboard");
+		button.addListener(SWT.Selection, event -> dumpClipboard());
+		button.setLayoutData(gridData);
 	}
 
 	private static StyleRange makeRange(Matcher m) {
@@ -242,5 +252,55 @@ public class StyledTextDialog {
 				System.out.printf("Formatting [%d, %d] : '%s' // %s%n", start, end, group, range);
 			}
 		}
+	}
+
+	static void dumpClipboard() {
+		Clipboard clipboard = new Clipboard(display);
+		
+		String[] typeNames = clipboard.getAvailableTypeNames();
+		TransferData[] transferTypes = clipboard.getAvailableTypes();
+		int[] types = new int[transferTypes.length];
+		for (int i = 0; i < transferTypes.length; i++) {
+			types[i] = transferTypes[i].type;
+		}
+
+		System.out.println("SWT Clipboard content:");
+		for (String typeName : typeNames) {
+			System.out.println("    typeName : " + typeName);			
+		}
+		for (TransferData transferType : transferTypes) {
+			System.out.println("    TransferData : " + transferType.type);
+		}
+
+		ClipboardDumper.dump();
+	}
+
+
+	static class DumpClipboardTransfer extends ByteArrayTransfer {
+		public final String[] typeNames;
+		public final int[] types;
+
+		public DumpClipboardTransfer(String[] typeNames, int[] types) {
+			this.typeNames = typeNames;
+			this.types = types;
+		}		 
+
+		@Override
+		protected int[] getTypeIds() {
+			return types;
+		}
+
+		@Override
+		protected String[] getTypeNames() {
+			return typeNames;
+		}
+		
+		 protected void javaToNative(Object object, TransferData transferData) {
+			 System.out.println("javaToNative : " + object + " => " + transferData);
+		 }
+		 protected Object nativeToJava(TransferData transferData) {
+			 System.out.println("nativeToJava : " + transferData);
+			 return null;
+		 }
 	}
 }

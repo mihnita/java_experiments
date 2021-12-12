@@ -13,3 +13,7 @@ Most interesting is to do it in some app that supports styled text.
 
 Some ideas: MS Word, PowerPoint, MS Write, OpenOffice, LibreOffice, TextEdit (macos)  
 Or web based: GMail, Google Docs, Google Slides, Office 360, etc.
+
+"Dump Clipboard" is used for debugging.
+Creates a `clipdump` folder under `target` and dumps the content of all the types found in the clipboard.
+The `Descript.ion` file contains the mapping from the file name to the clipboard flavor mime type.
