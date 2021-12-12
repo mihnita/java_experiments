@@ -72,7 +72,7 @@ public class StyledTextDialog {
 	}
 
 	private void createContents(final Shell shell) {
-		final int columncount = 3;
+		final int columncount = 4;
 		shell.setLayout(new GridLayout(columncount, true));
 
 		final StyledText styled = new StyledText(shell, SWT.BORDER);
@@ -103,6 +103,11 @@ public class StyledTextDialog {
 		button = new Button(shell, SWT.NONE);
 		button.setText("&Dump Clipboard");
 		button.addListener(SWT.Selection, event -> dumpClipboard());
+		button.setLayoutData(gridData);
+
+		button = new Button(shell, SWT.NONE);
+		button.setText("E&xit");
+		button.addListener(SWT.Selection, event -> shell.close());
 		button.setLayoutData(gridData);
 	}
 
@@ -208,15 +213,15 @@ public class StyledTextDialog {
 					range = makeRange(m);
 					range.borderStyle = SWT.BORDER_DOT;
 					break;
-				case "consolas_0123456789":
+				case "!consolas_0123456789":
 					range = makeRange(m);
 					range.font = new Font(display, "Consolas", FONT_SIZE, SWT.NONE);
 					break;
-				case "times_new_roman":
+				case "!times_new_roman":
 					range = makeRange(m);
 					range.font = new Font(display, "Times New Roman", FONT_SIZE, SWT.NONE);
 					break;
-				case "arial":
+				case "!arial":
 					range = makeRange(m);
 					range.font = new Font(display, "Arial", FONT_SIZE, SWT.NONE);
 					break;
@@ -233,7 +238,7 @@ public class StyledTextDialog {
 					range.borderColor = display.getSystemColor(SWT.COLOR_MAGENTA);
 					break;
 				default:
-					if (group.startsWith("\u2022")) {
+					if (group.startsWith("!\u2022")) {
 						range = makeRange(m);
 						// Apply style to the complete line that starts with bullet
 						int endOfLine = PREVIEW_STRING.indexOf("\n", m.start());
@@ -256,7 +261,7 @@ public class StyledTextDialog {
 
 	static void dumpClipboard() {
 		Clipboard clipboard = new Clipboard(display);
-		
+
 		String[] typeNames = clipboard.getAvailableTypeNames();
 		TransferData[] transferTypes = clipboard.getAvailableTypes();
 		int[] types = new int[transferTypes.length];
